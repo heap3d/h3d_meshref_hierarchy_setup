@@ -72,7 +72,7 @@ def main() -> None:
         reset_hierarchy_info(mesh)
 
 
-h3dd = H3dDebug(enable=True, file=replace_file_ext(modo.Scene().filename, '.log'))
+h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
 
 if __name__ == '__main__':
     main()
