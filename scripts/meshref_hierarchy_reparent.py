@@ -54,12 +54,17 @@ def get_transform_values(item: modo.Item) -> tuple:
     """
     multiline_desc = get_description_tag(item).splitlines()
 
-    pos = tuple(map(float, multiline_desc[1].split()))
-    h3dd.print_debug(f'pos: {pos}')
-    rot = tuple(map(float, multiline_desc[2].split()))
-    h3dd.print_debug(f'rot: {rot}')
-    scl = tuple(map(float, multiline_desc[3].split()))
-    h3dd.print_debug(f'scl: {scl}')
+    try:
+        pos = tuple(map(float, multiline_desc[1].split()))
+        h3dd.print_debug(f'pos: {pos}')
+        rot = tuple(map(float, multiline_desc[2].split()))
+        h3dd.print_debug(f'rot: {rot}')
+        scl = tuple(map(float, multiline_desc[3].split()))
+        h3dd.print_debug(f'scl: {scl}')
+    except IndexError:
+        pos = (0.0, 0.0, 0.0)
+        rot = (0.0, 0.0, 0.0)
+        scl = (1.0, 1.0, 1.0)
 
     return tuple((pos, rot, scl))
 
