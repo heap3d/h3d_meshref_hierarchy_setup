@@ -26,6 +26,44 @@ import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix, is_mesh_prefix
 
 
+def get_parent_info(item: modo.Item) -> str:
+    """get item parent info from item's description tag
+
+    Args:
+        item (modo.Item): item to get a description tag from
+
+    Returns:
+        str: parent info string
+    """
+    description = get_description_tag(item).splitlines()[0]
+    return description
+
+
+def get_transform_values(item: modo.Item) -> tuple:
+    """get transform values from item's description tag
+
+    Args:
+        item (modo.Item): item to get a description tag from
+
+    Returns:
+        tuple ((px, py, pz), (rx, ry, rz), (sx, sy, sz))
+        where
+        (px, py, pz): position values
+        (rx, ry, rz): rotation values
+        (sx, sy, sz): scale values
+    """
+    multiline_desc = get_description_tag(item).splitlines()
+
+    pos = tuple(map(float, multiline_desc[1].split()))
+    h3dd.print_debug(f'pos: {pos}')
+    rot = tuple(map(float, multiline_desc[2].split()))
+    h3dd.print_debug(f'rot: {rot}')
+    scl = tuple(map(float, multiline_desc[3].split()))
+    h3dd.print_debug(f'scl: {scl}')
+
+    return tuple((pos, rot, scl))
+
+
 def reparent(mesh: modo.Item) -> None:
     """reparent item to respective root
 
@@ -35,6 +73,12 @@ def reparent(mesh: modo.Item) -> None:
     root = get_mesh_root(mesh)
 
     mesh.setParent(root)
+
+    pos, rot, scl = get_transform_values(mesh)
+
+    mesh.position.set(pos)
+    mesh.rotation.set(rot)
+    mesh.scale.set(scl)
 
 
 def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
@@ -50,9 +94,9 @@ def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
         return None
 
     roots = {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
-    mesh_info = get_description_tag(mesh)
+    mesh_info = get_parent_info(mesh)
     for root in roots:
-        if get_description_tag(root) == mesh_info:
+        if get_parent_info(root) == mesh_info:
             return root
 
     return None
@@ -103,14 +147,13 @@ def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
     if not is_root_prefix(root):
         return set()
 
-    root_info = get_description_tag(root)
+    root_info = get_parent_info(root)
 
     return {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
-            if get_description_tag(i) == root_info}
+            if get_parent_info(i) == root_info}
 
 
 def main():
-    h3dd.print_debug(f'lx.args(): {lx.args}')
     if not lx.args():
         superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}

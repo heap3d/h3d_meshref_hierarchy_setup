@@ -100,6 +100,9 @@ def store_mesh_info(item: modo.Item) -> None:
     """Store hierarchy info about specified mesh item as child:
         - child prefix in the mesh name
         - hierarchy id pointed to the corresponding parent item
+        - [px py pz]: position values
+        - [rx ry rz]: rotation values
+        - [sx sy sz]: scale values
 
     Args:
         item (modo.Item): mesh item to store info about
@@ -108,7 +111,14 @@ def store_mesh_info(item: modo.Item) -> None:
         return
 
     hierarchy_id = get_description_tag(item.parent)
-    set_description_tag(item=item, text=hierarchy_id)
+    px, py, pz = item.position.get()
+    pos_values = f'{px} {py} {pz}'
+    rx, ry, rz = item.rotation.get()
+    rot_values = f'{rx} {ry} {rz}'
+    sx, sy, sz = item.scale.get()
+    scl_values = f'{sx} {sy} {sz}'
+    description = f'{hierarchy_id}\n{pos_values}\n{rot_values}\n{scl_values}'
+    set_description_tag(item=item, text=description)
     add_prefix_to_name(item=item, prefix=h3dc.MESH_PREFIX)
 
 

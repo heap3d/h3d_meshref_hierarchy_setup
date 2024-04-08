@@ -16,6 +16,8 @@ import lx
 from typing import Union
 
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
+from h3d_utilites.scripts.h3d_debug import H3dDebug
+from h3d_utilites.scripts.h3d_utils import replace_file_ext
 
 
 def reset_hierarchy_info(item: modo.Item) -> None:
@@ -25,6 +27,7 @@ def reset_hierarchy_info(item: modo.Item) -> None:
     if item.name.startswith(h3dc.MESH_PREFIX):
         item.name = item.name[len(h3dc.MESH_PREFIX):]
     # remove description tag from the item
+    item.select(replace=True)
     lx.eval('item.tagRemove DESC')
 
 
@@ -48,13 +51,19 @@ def main() -> None:
     roots = set()
     meshes = set()
     if not lx.args():
-        locators: set[modo.Item] = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)  # type: ignore
-        roots: set[modo.Item] = filter(is_root_prefix, locators)  # type: ignore
-        meshes: set[modo.Item] = filter(is_mesh_prefix, locators)  # type: ignore
+        locators: set[modo.Item] = set(modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True))
+        h3dd.print_items(locators, 'locators:')
+        roots: set[modo.Item] = set(filter(is_root_prefix, locators))
+        h3dd.print_items(roots, 'roots:')
+        meshes: set[modo.Item] = set(filter(is_mesh_prefix, locators))
+        h3dd.print_items(meshes, 'meshes:')
     elif h3dc.CMD_SELECTED in lx.args():  # type: ignore
-        selected: set[modo.Item] = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)  # type: ignore
-        roots: set[modo.Item] = filter(is_root_prefix, selected)  # type: ignore
-        meshes: set[modo.Item] = filter(is_mesh_prefix, selected)  # type: ignore
+        selected: set[modo.Item] = set(modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True))
+        h3dd.print_items(selected, 'locators:')
+        roots: set[modo.Item] = set(filter(is_root_prefix, selected))
+        h3dd.print_items(roots, 'roots:')
+        meshes: set[modo.Item] = set(filter(is_mesh_prefix, selected))
+        h3dd.print_items(meshes, 'meshes:')
 
     for root in roots:
         reset_hierarchy_info(root)
@@ -62,6 +71,8 @@ def main() -> None:
     for mesh in meshes:
         reset_hierarchy_info(mesh)
 
+
+h3dd = H3dDebug(enable=True, file=replace_file_ext(modo.Scene().filename, '.log'))
 
 if __name__ == '__main__':
     main()
