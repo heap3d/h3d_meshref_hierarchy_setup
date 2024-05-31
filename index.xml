@@ -3,11 +3,13 @@
 	<kit name="h3d_meshref_hierarchy_setup" restart="YES">
 		<source target="h3d_meshref_hierarchy_setup/index.cfg">index.cfg</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/h3d_kit_constants.py">scripts/h3d_kit_constants.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/add_processed_mark.py">scripts/add_processed_mark.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_export.py">scripts/meshref_hierarchy_export.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_normalize.py">scripts/meshref_hierarchy_normalize.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_reparent.py">scripts/meshref_hierarchy_reparent.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_reset.py">scripts/meshref_hierarchy_reset.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_unparent.py">scripts/meshref_hierarchy_unparent.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/remove_processed_mark.py">scripts/remove_processed_mark.py</source>
 	</kit>
 	<message button="Help">h3d_meshref_hierarchy_setup Kit installation complete.</message>
 </package>

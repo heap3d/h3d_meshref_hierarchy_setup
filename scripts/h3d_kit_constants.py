@@ -13,3 +13,5 @@ MESH_PREFIX = '[M]'
 
 CMD_SELECTED = 'selected'
 CMD_HIERARCHY = 'hierarchy'
+
+PROCESSED_MARK = 'processed'

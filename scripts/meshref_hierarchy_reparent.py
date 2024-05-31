@@ -21,7 +21,7 @@ import modo.constants as c
 from typing import Union
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import replace_file_ext, get_description_tag
+from h3d_utilites.scripts.h3d_utils import replace_file_ext, get_description_tag, set_description_tag
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix, is_mesh_prefix
 
@@ -56,17 +56,51 @@ def get_transform_values(item: modo.Item) -> tuple:
 
     try:
         pos = tuple(map(float, multiline_desc[1].split()))
-        h3dd.print_debug(f'pos: {pos}')
         rot = tuple(map(float, multiline_desc[2].split()))
-        h3dd.print_debug(f'rot: {rot}')
         scl = tuple(map(float, multiline_desc[3].split()))
-        h3dd.print_debug(f'scl: {scl}')
     except IndexError:
         pos = (0.0, 0.0, 0.0)
         rot = (0.0, 0.0, 0.0)
         scl = (1.0, 1.0, 1.0)
 
     return tuple((pos, rot, scl))
+
+
+def is_processed(item: modo.Item) -> bool:
+    """checks if item has processed mark
+
+    Args:
+        item (modo.Item): item to check
+
+    Returns:
+        bool: True if item contains the mark, False otherwise
+    """
+    tag = get_description_tag(item)
+    if h3dc.PROCESSED_MARK in tag:
+        return True
+
+    return False
+
+
+def add_processed_mark(item: modo.Item) -> None:
+    """Add processed mark to the item
+
+    Args:
+        item (modo.Item): Item to proceed
+    """
+    tag = get_description_tag(item)
+    processed_tag = f'{tag}\n{h3dc.PROCESSED_MARK}'
+    set_description_tag(item, processed_tag)
+
+
+def remove_processed_mark(item: modo.Item) -> None:
+    tag = get_description_tag(item)
+    parts = tag.split(h3dc.PROCESSED_MARK)
+    try:
+        cleaned_tag = f'{parts[0]}{parts[1]}'.strip()
+        set_description_tag(item, cleaned_tag)
+    except IndexError:
+        print(f'<{item.name}> has no PROCESSED_MARK')
 
 
 def reparent(mesh: modo.Item) -> None:
@@ -81,9 +115,12 @@ def reparent(mesh: modo.Item) -> None:
 
     pos, rot, scl = get_transform_values(mesh)
 
-    mesh.position.set(pos)
-    mesh.rotation.set(rot)
-    mesh.scale.set(scl)
+    try:
+        mesh.position.set(pos)
+        mesh.rotation.set(rot)
+        mesh.scale.set(scl)
+    except AttributeError:
+        print(f'reparent alignment failed for item:<{mesh.name}>')
 
 
 def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
@@ -98,7 +135,7 @@ def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
     if not is_mesh_prefix(mesh):
         return None
 
-    roots = {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
+    roots = {i for i in scene.items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
     mesh_info = get_parent_info(mesh)
     for root in roots:
         if get_parent_info(root) == mesh_info:
@@ -154,32 +191,39 @@ def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
 
     root_info = get_parent_info(root)
 
-    return {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
+    return {i for i in scene.items(itype=c.LOCATOR_TYPE, superType=True)
             if get_parent_info(i) == root_info}
 
 
 def main():
     if not lx.args():
-        superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = scene.items(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
-            reparent(mesh=mesh)
+            if not is_processed(mesh):
+                reparent(mesh=mesh)
+                add_processed_mark(mesh)
     elif h3dc.CMD_SELECTED:
-        superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = scene.selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
-            reparent(mesh=mesh)
+            if not is_processed(mesh):
+                reparent(mesh=mesh)
+                add_processed_mark(mesh)
     elif h3dc.CMD_HIERARCHY:
-        selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+        selected = scene.selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = set()
         for item in selected:
             root = get_hierarchy_root(item)
             meshes = meshes.union(get_hierarchy_meshes(root))
         for mesh in meshes:
-            reparent(mesh=mesh)
+            if not is_processed(mesh):
+                reparent(mesh=mesh)
+                add_processed_mark(mesh)
 
 
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
+scene = modo.Scene()
+h3dd = H3dDebug(enable=True, file=replace_file_ext(scene.filename, '.log'))
 
 if __name__ == '__main__':
     main()
