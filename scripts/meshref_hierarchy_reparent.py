@@ -223,7 +223,7 @@ def main():
 
 
 scene = modo.Scene()
-h3dd = H3dDebug(enable=True, file=replace_file_ext(scene.filename, '.log'))
+h3dd = H3dDebug(enable=False, file=replace_file_ext(scene.filename, '.log'))
 
 if __name__ == '__main__':
     main()
