@@ -22,12 +22,13 @@ from h3d_utilites.scripts.h3d_utils import replace_file_ext
 
 
 def get_fileindex(filepath: str) -> str:
+    if not os.path.isfile(filepath):
+        return ''
     dir, scenename = os.path.split(filepath)
     files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
-    if scenename not in files:
-        return ''
 
-    indexedfiles = sorted([f for f in files if f.startswith(scenename)])
+    basename = os.path.splitext(scenename)[0]
+    indexedfiles = sorted([f for f in files if f.startswith(basename)])
     pattern = r'(\d+).lxo$'
     try:
         lastindex = int(re.findall(pattern, indexedfiles[-1])[0])
