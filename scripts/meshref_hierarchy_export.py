@@ -8,23 +8,48 @@
 # h3d
 # exports hierarchy items as hierarchy scene and other items as meshref scene
 
+import os
+import re
+
 import modo
 import modo.constants as c
 import lx
 
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix
 
+from h3d_utilites.scripts.h3d_debug import H3dDebug
+from h3d_utilites.scripts.h3d_utils import replace_file_ext
+
+
+def get_fileindex(filepath: str) -> str:
+    dir, scenename = os.path.split(filepath)
+    files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
+    if scenename not in files:
+        return ''
+
+    indexedfiles = sorted([f for f in files if f.startswith(scenename)])
+    pattern = r'(\d+).lxo$'
+    try:
+        lastindex = int(re.findall(pattern, indexedfiles[-1])[0])
+    except IndexError:
+        lastindex = 0
+
+    return f'_{lastindex+1:04}'
+
 
 def generate_filename(name: str, is_hierarchy: bool, h_sfx: str = '_Hierarchy', m_sfx: str = '_MeshRef') -> str:
     name, = name.rsplit('.')[:1]
     name = name.removesuffix(m_sfx)
     name = name.removesuffix(h_sfx)
-    if is_hierarchy:
-        name = name + h_sfx
-    else:
-        name = name + m_sfx
 
-    return name + '.lxo'
+    if not is_hierarchy:
+        name = name + m_sfx
+        return f'{name}.lxo'
+
+    name = name + h_sfx
+    fileindex = get_fileindex(f'{name}.lxo')
+
+    return f'{name}{fileindex}.lxo'
 
 
 def main() -> None:
@@ -53,6 +78,8 @@ def main() -> None:
     lx.eval(f'scene.set {current_scene_id}')
     lx.eval(f'scene.saveAs "{meshref_filename}" $LXOB false')
 
+
+h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().name, ext='.log'))
 
 if __name__ == '__main__':
     main()

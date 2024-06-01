@@ -135,7 +135,7 @@ def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
     if not is_mesh_prefix(mesh):
         return None
 
-    roots = {i for i in scene.items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
+    roots = {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
     mesh_info = get_parent_info(mesh)
     for root in roots:
         if get_parent_info(root) == mesh_info:
@@ -191,27 +191,27 @@ def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
 
     root_info = get_parent_info(root)
 
-    return {i for i in scene.items(itype=c.LOCATOR_TYPE, superType=True)
+    return {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
             if get_parent_info(i) == root_info}
 
 
 def main():
     if not lx.args():
-        superlocators = scene.items(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
             if not is_processed(mesh):
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
     elif h3dc.CMD_SELECTED:
-        superlocators = scene.selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
             if not is_processed(mesh):
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
     elif h3dc.CMD_HIERARCHY:
-        selected = scene.selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+        selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = set()
         for item in selected:
             root = get_hierarchy_root(item)
@@ -222,8 +222,7 @@ def main():
                 add_processed_mark(mesh)
 
 
-scene = modo.Scene()
-h3dd = H3dDebug(enable=False, file=replace_file_ext(scene.filename, '.log'))
+h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
 
 if __name__ == '__main__':
     main()

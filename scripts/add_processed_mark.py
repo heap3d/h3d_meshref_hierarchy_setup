@@ -20,23 +20,21 @@ import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 
 def main():
     if not lx.args():
-        superlocators = scene.items(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
             if not is_processed(mesh):
                 add_processed_mark(mesh)
     elif h3dc.CMD_SELECTED:
-        superlocators = scene.selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+        superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
         for mesh in meshes:
             if not is_processed(mesh):
                 add_processed_mark(mesh)
-        scene.deselect()
+        modo.Scene().deselect()
         for item in meshes:
             item.select()
 
-
-scene = modo.Scene()
 
 if __name__ == '__main__':
     main()
