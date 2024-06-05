@@ -149,7 +149,10 @@ def unparent_hierarchy(root: modo.Item) -> None:
 
     flattened_meshes = {i for i in meshes if i.parent}
     if flattened_meshes:
-        parent_items_to(meshes, None)
+        index = parent.rootIndex
+        if not index:
+            index = 0
+        parent_items_to(items=meshes, parent=None, index=index)
 
 
 def main() -> None:
