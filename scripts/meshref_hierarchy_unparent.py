@@ -12,6 +12,7 @@
 
 import modo
 import modo.constants as c
+import lx
 
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_utilites.scripts.h3d_utils import (
@@ -111,12 +112,23 @@ def store_mesh_info(item: modo.Item) -> None:
         return
 
     hierarchy_id = get_description_tag(item.parent)
-    px, py, pz = item.position.get()
+    h3dd.print_debug(f'item: {item.name}')
+    px = lx.eval(f'transform.channel pos.X ? item:{item.id}')
+    py = lx.eval(f'transform.channel pos.Y ? item:{item.id}')
+    pz = lx.eval(f'transform.channel pos.Z ? item:{item.id}')
+    rx = lx.eval(f'transform.channel rot.X ? item:{item.id}')
+    ry = lx.eval(f'transform.channel rot.Y ? item:{item.id}')
+    rz = lx.eval(f'transform.channel rot.Z ? item:{item.id}')
+    sx = lx.eval(f'transform.channel scl.X ? item:{item.id}')
+    sy = lx.eval(f'transform.channel scl.Y ? item:{item.id}')
+    sz = lx.eval(f'transform.channel scl.Z ? item:{item.id}')
+    # px, py, pz = item.position.get()
     pos_values = f'{px} {py} {pz}'
-    rx, ry, rz = item.rotation.get()
+    # rx, ry, rz = item.rotation.get()
     rot_values = f'{rx} {ry} {rz}'
-    sx, sy, sz = item.scale.get()
+    # sx, sy, sz = item.scale.get()
     scl_values = f'{sx} {sy} {sz}'
+
     description = f'{hierarchy_id}\n{pos_values}\n{rot_values}\n{scl_values}'
     set_description_tag(item=item, text=description)
     add_prefix_to_name(item=item, prefix=h3dc.MESH_PREFIX)
@@ -174,8 +186,7 @@ def main() -> None:
         unparent_hierarchy(normalized_hierarchy)
 
 
-scenename = replace_file_ext(modo.Scene().filename, ".log")
-h3dd = H3dDebug(enable=False, file=scenename)
-
 if __name__ == "__main__":
+    scenename = replace_file_ext(modo.Scene().filename, ".log")
+    h3dd = H3dDebug(enable=True, file=scenename)
     main()
