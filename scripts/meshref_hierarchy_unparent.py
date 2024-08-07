@@ -188,5 +188,5 @@ def main() -> None:
 
 if __name__ == "__main__":
     scenename = replace_file_ext(modo.Scene().filename, ".log")
-    h3dd = H3dDebug(enable=True, file=scenename)
+    h3dd = H3dDebug(enable=False, file=scenename)
     main()
