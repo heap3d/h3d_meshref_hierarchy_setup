@@ -92,14 +92,8 @@ def is_hierarchy_setup_item(item: modo.Item) -> bool:
     return False
 
 
-def main():
-    meshes = modo.Scene().meshes
-    printi(meshes, 'meshes:')
-    locators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=False)
-    printi(locators, 'locators:')
-
-    selected = modo.Scene().selected
-
+def convert_transforms(meshes: list[modo.Mesh], locators: list[modo.Item]) -> list[modo.Item]:
+    working_locators = locators[:]
     for mesh in meshes:
         printd(f'{mesh.name}, {mesh=}')
         if is_hierarchy_setup_item(mesh):
@@ -109,22 +103,35 @@ def main():
             printd('not is_nonzero_transfers. skipped.', 1)
             continue
         printd(f'non-zero transforms detected. {mesh.name=} {mesh=}', 1)
-        locator = matched_item(mesh, locators)
+        locator = matched_item(mesh, working_locators)
         if not locator:
             printd("locator doesn't exist. creating...", 1)
             locator = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
             locator.name = mesh.name + LOCATOR_SUFFIX
             match_item(locator, mesh)
             parent(locator, position=get_parent_index(mesh))
-            locators.append(locator)
+            working_locators.append(locator)
         else:
             printd('locator found', 1)
         printd(f'locator: {locator.name} {locator=}', 1)
         parent(mesh, locator)
 
+    return working_locators[len(locators):]
+
+
+def main():
+    meshes = [item for item in modo.Scene().meshes if not item.parent]
+    printi(meshes, 'meshes:')
+    locators = [item for item in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=False) if not item.parent]
+    printi(locators, 'locators:')
+
+    selected = modo.Scene().selected
+
+    new_locators = convert_transforms(meshes, locators)
+
     modo.Scene().deselect()
-    if locators:
-        for item in locators:
+    if new_locators:
+        for item in new_locators:
             item.select()
     else:
         for item in selected:
