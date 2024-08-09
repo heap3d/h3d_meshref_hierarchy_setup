@@ -5,7 +5,6 @@
 # --------------------------------
 # modo python
 # EMAG
-# h3d
 # h3d_meshref_hierarchy_setup constants
 
 ROOT_PREFIX = '[R]'

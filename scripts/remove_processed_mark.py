@@ -5,7 +5,6 @@
 # --------------------------------
 # modo python
 # EMAG
-# h3d
 # remove a 'processed' mark from items
 
 

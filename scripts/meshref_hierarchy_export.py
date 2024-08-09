@@ -5,7 +5,6 @@
 # --------------------------------
 # modo python
 # EMAG
-# h3d
 # exports hierarchy items as hierarchy scene and other items as meshref scene
 
 import os

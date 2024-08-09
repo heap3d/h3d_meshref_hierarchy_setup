@@ -122,11 +122,8 @@ def store_mesh_info(item: modo.Item) -> None:
     sx = lx.eval(f'transform.channel scl.X ? item:{item.id}')
     sy = lx.eval(f'transform.channel scl.Y ? item:{item.id}')
     sz = lx.eval(f'transform.channel scl.Z ? item:{item.id}')
-    # px, py, pz = item.position.get()
     pos_values = f'{px} {py} {pz}'
-    # rx, ry, rz = item.rotation.get()
     rot_values = f'{rx} {ry} {rz}'
-    # sx, sy, sz = item.scale.get()
     scl_values = f'{sx} {sy} {sz}'
 
     description = f'{hierarchy_id}\n{pos_values}\n{rot_values}\n{scl_values}'
