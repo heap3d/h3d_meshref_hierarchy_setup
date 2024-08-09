@@ -98,7 +98,8 @@ def main():
     locators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=False)
     printi(locators, 'locators:')
 
-    # TODO ignore processed meshes
+    selected = modo.Scene().selected
+
     for mesh in meshes:
         printd(f'{mesh.name}, {mesh=}')
         if is_hierarchy_setup_item(mesh):
@@ -121,9 +122,17 @@ def main():
         printd(f'locator: {locator.name} {locator=}', 1)
         parent(mesh, locator)
 
+    modo.Scene().deselect()
+    if locators:
+        for item in locators:
+            item.select()
+    else:
+        for item in selected:
+            item.select()
+
 
 if __name__ == '__main__':
-    h3dd = H3dDebug(enable=True, file=modo.Scene().name + '.log')
+    h3dd = H3dDebug(enable=False, file=modo.Scene().name + '.log')
     printd = h3dd.print_debug
     printi = h3dd.print_items
     main()
