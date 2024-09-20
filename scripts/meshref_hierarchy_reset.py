@@ -22,13 +22,20 @@ from h3d_utilites.scripts.h3d_utils import replace_file_ext
 
 def reset_hierarchy_info(item: modo.Item) -> None:
     # remove name prefix
-    if item.name.startswith(h3dc.ROOT_PREFIX):
-        item.name = item.name[len(h3dc.ROOT_PREFIX):]
-    if item.name.startswith(h3dc.MESH_PREFIX):
-        item.name = item.name[len(h3dc.MESH_PREFIX):]
+    try:
+        if item.name.startswith(h3dc.ROOT_PREFIX):
+            item.name = item.name[len(h3dc.ROOT_PREFIX):]
+        if item.name.startswith(h3dc.MESH_PREFIX):
+            item.name = item.name[len(h3dc.MESH_PREFIX):]
+    except RuntimeError:
+        printd(f'Failed to reset item name: <{item.name}>')
+
     # remove description tag from the item
-    item.select(replace=True)
-    lx.eval('item.tagRemove DESC')
+    try:
+        item.select(replace=True)
+        lx.eval('item.tagRemove DESC')
+    except RuntimeError:
+        printd(f'Failed to remove description tag: <{item.name}>')
 
 
 def is_root_prefix(item: Union[modo.Item, None]) -> bool:
@@ -73,6 +80,7 @@ def main() -> None:
 
 
 h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
+printd = h3dd.print_debug
 
 if __name__ == '__main__':
     main()
