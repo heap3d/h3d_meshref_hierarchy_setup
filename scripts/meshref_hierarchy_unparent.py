@@ -58,7 +58,7 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
             item.setParent(locator)
 
         locator.setParent(mesh)
-        parent_items_to([locator], mesh.parent)
+        parent_items_to([locator], mesh.parent)  # type: ignore
         parent_items_to([mesh], locator)
 
     updated_root = root.parent
@@ -161,7 +161,7 @@ def unparent_hierarchy(root: modo.Item) -> None:
         index = parent.rootIndex
         if not index:
             index = 0
-        parent_items_to(items=meshes, parent=None, index=index)
+        parent_items_to(items=meshes, parent=None, index=index)  # type: ignore
 
 
 def main() -> None:
