@@ -203,6 +203,8 @@ def main():
             if not is_processed(mesh):
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
+            else:
+                print(f'{mesh.name=} was not reparent: already processed')
     elif h3dc.CMD_SELECTED:
         superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
@@ -210,6 +212,8 @@ def main():
             if not is_processed(mesh):
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
+            else:
+                print(f'{mesh.name=} was not reparent: already processed')
     elif h3dc.CMD_HIERARCHY:
         selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = set()
@@ -220,6 +224,8 @@ def main():
             if not is_processed(mesh):
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
+            else:
+                print(f'{mesh.name=} was not reparent: already processed')
 
 
 h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
