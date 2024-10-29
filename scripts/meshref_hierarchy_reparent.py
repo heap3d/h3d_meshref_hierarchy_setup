@@ -26,6 +26,9 @@ import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix, is_mesh_prefix
 
 
+MSG_WAS_NOT_REPARENT = 'was not reparent: already processed'
+
+
 def get_parent_info(item: modo.Item) -> str:
     """get item parent info from item's description tag
 
@@ -204,7 +207,7 @@ def main():
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
             else:
-                print(f'{mesh.name=} was not reparent: already processed')
+                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
     elif h3dc.CMD_SELECTED:
         superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = {i for i in superlocators if is_mesh_prefix(i)}
@@ -213,7 +216,7 @@ def main():
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
             else:
-                print(f'{mesh.name=} was not reparent: already processed')
+                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
     elif h3dc.CMD_HIERARCHY:
         selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
         meshes = set()
@@ -225,7 +228,7 @@ def main():
                 reparent(mesh=mesh)
                 add_processed_mark(mesh)
             else:
-                print(f'{mesh.name=} was not reparent: already processed')
+                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
 
 
 h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
