@@ -142,9 +142,6 @@ def convert_transforms_forced(meshes: list[modo.Mesh], locators: list[modo.Item]
     working_locators = locators[:]
 
     for mesh in meshes:
-        if is_hierarchy_setup_item(mesh):
-            continue
-
         locator = matched_item(mesh, working_locators)
         if not locator:
             locator = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
