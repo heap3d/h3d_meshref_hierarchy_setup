@@ -18,12 +18,12 @@
 import modo
 import lx
 import modo.constants as c
-from typing import Union
+from typing import Union, Iterable
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import replace_file_ext, get_description_tag, set_description_tag
+from h3d_utilites.scripts.h3d_utils import get_description_tag, set_description_tag
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix, is_mesh_prefix
+from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
 
 
 MSG_WAS_NOT_REPARENT = 'was not reparent: already processed'
@@ -156,13 +156,19 @@ def get_hierarchy_root(item: modo.Item) -> Union[modo.Item, None]:
     Returns:
         modo.Item: hierarchy root item
     """
+    fn_in()
+
+    prints(item)
     if is_root_prefix(item):
         parents = item.parents
         if parents:
+            fn_out()
             return parents[-1]
         else:
+            fn_out()
             return item
     elif not is_mesh_prefix(item):
+        fn_out()
         return None
 
     mesh_root = get_mesh_root(item)
@@ -172,8 +178,10 @@ def get_hierarchy_root(item: modo.Item) -> Union[modo.Item, None]:
     else:
         hierarchy_roots = None
     if not hierarchy_roots:
+        fn_out()
         return mesh_root
     else:
+        fn_out()
         return hierarchy_roots[-1]
 
 
@@ -198,40 +206,55 @@ def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
             if get_parent_info(i) == root_info}
 
 
+def get_hierarchy_members(items: Iterable[modo.Item]) -> set[modo.Item]:
+    meshes = set()
+    for item in items:
+        root = get_hierarchy_root(item)
+        meshes = meshes.union(get_hierarchy_meshes(root))
+
+    return meshes
+
+
+def default_action():
+    superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
+    meshes = {i for i in superlocators if is_mesh_prefix(i)}
+    reparent_meshes(meshes)
+
+
+def selected_action():
+    superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    meshes = {i for i in superlocators if is_mesh_prefix(i)}
+    reparent_meshes(meshes)
+
+
+def hierarchy_action():
+    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    meshes = get_hierarchy_members(selected)
+    reparent_meshes(meshes)
+
+
+def reparent_meshes(meshes: Iterable[modo.Item]):
+    for mesh in meshes:
+        if not is_processed(mesh):
+            reparent(mesh=mesh)
+            add_processed_mark(mesh)
+        else:
+            print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
+
+
 def main():
-    if not lx.args():
-        superlocators = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
-        meshes = {i for i in superlocators if is_mesh_prefix(i)}
-        for mesh in meshes:
-            if not is_processed(mesh):
-                reparent(mesh=mesh)
-                add_processed_mark(mesh)
-            else:
-                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
-    elif h3dc.CMD_SELECTED:
-        superlocators = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
-        meshes = {i for i in superlocators if is_mesh_prefix(i)}
-        for mesh in meshes:
-            if not is_processed(mesh):
-                reparent(mesh=mesh)
-                add_processed_mark(mesh)
-            else:
-                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
-    elif h3dc.CMD_HIERARCHY:
-        selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
-        meshes = set()
-        for item in selected:
-            root = get_hierarchy_root(item)
-            meshes = meshes.union(get_hierarchy_meshes(root))
-        for mesh in meshes:
-            if not is_processed(mesh):
-                reparent(mesh=mesh)
-                add_processed_mark(mesh)
-            else:
-                print(f'{mesh.name=} {MSG_WAS_NOT_REPARENT}')
+    arg = ''
+    if lx.args():
+        arg = lx.args()[0]  # type: ignore
 
+    actions = {
+        h3dc.CMD_SELECTED: selected_action,
+        h3dc.CMD_HIERARCHY: hierarchy_action,
+    }
 
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
+    action = actions.get(arg, default_action)
+    action()
+
 
 if __name__ == '__main__':
     main()

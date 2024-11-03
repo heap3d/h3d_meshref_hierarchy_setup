@@ -7,15 +7,13 @@
 # EMAG
 # scan scene and add locator parent to transformed mesh
 
-
 import modo
 import modo.constants as c
 import lx
 
 from typing import Union
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import get_parent_index, replace_file_ext
+from h3d_utilites.scripts.h3d_utils import get_parent_index
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 
 
@@ -251,10 +249,9 @@ def forced_selected_action() -> tuple[modo.Item, ...]:
 
 
 def main():
-    try:
+    arg = ''
+    if lx.args():
         arg = lx.args()[0]  # type: ignore
-    except IndexError:
-        arg = ''
 
     actions = {
         ARG_SELECTED: selected_action,
@@ -273,10 +270,6 @@ def main():
         for item in selected:
             item.select()
 
-
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().name, '.log'))
-printd = h3dd.print_debug
-printi = h3dd.print_items
 
 if __name__ == '__main__':
     main()

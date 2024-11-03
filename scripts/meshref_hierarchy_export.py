@@ -16,9 +16,6 @@ import lx
 
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import replace_file_ext
-
 
 def get_fileindex(filepath: str) -> str:
     if not os.path.isfile(filepath):
@@ -78,8 +75,6 @@ def main() -> None:
     lx.eval(f'scene.set {current_scene_id}')
     lx.eval(f'scene.saveAs "{meshref_filename}" $LXOB false')
 
-
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().name, ext='.log'))
 
 if __name__ == '__main__':
     main()

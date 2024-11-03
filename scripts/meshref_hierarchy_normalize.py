@@ -13,8 +13,6 @@
 import modo
 import modo.constants as c
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import replace_file_ext
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_unparent import normalize_hierarchy
 
 
@@ -33,6 +31,5 @@ def main() -> None:
         root.select()
 
 
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
 if __name__ == '__main__':
     main()

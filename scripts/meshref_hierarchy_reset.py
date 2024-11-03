@@ -16,8 +16,7 @@ import lx
 from typing import Union
 
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
-from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import replace_file_ext
+from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
 
 
 def reset_hierarchy_info(item: modo.Item) -> None:
@@ -28,22 +27,28 @@ def reset_hierarchy_info(item: modo.Item) -> None:
         if item.name.startswith(h3dc.MESH_PREFIX):
             item.name = item.name[len(h3dc.MESH_PREFIX):]
     except RuntimeError:
-        printd(f'Failed to reset item name: <{item.name}>')
+        prints(f'Failed to reset item name: <{item.name}>')
 
     # remove description tag from the item
     try:
         item.select(replace=True)
         lx.eval('item.tagRemove DESC')
     except RuntimeError:
-        printd(f'Failed to remove description tag: <{item.name}>')
+        prints(f'Failed to remove description tag: <{item.name}>')
 
 
 def is_root_prefix(item: Union[modo.Item, None]) -> bool:
+    fn_in(f'<{item.name=}> : <{item}>')  # type: ignore
+
+    prints(item)
     if not item:
+        fn_out('not item: False')
         return False
     if item.name.startswith(h3dc.ROOT_PREFIX):
+        fn_out(f'item.name.startswith({h3dc.ROOT_PREFIX=}): return True')
         return True
 
+    fn_out('return False')
     return False
 
 
@@ -59,18 +64,18 @@ def main() -> None:
     meshes = set()
     if not lx.args():
         locators: set[modo.Item] = set(modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True))
-        h3dd.print_items(locators, 'locators:')
+        prints(locators)
         roots: set[modo.Item] = set(filter(is_root_prefix, locators))
-        h3dd.print_items(roots, 'roots:')
+        prints(roots)
         meshes: set[modo.Item] = set(filter(is_mesh_prefix, locators))
-        h3dd.print_items(meshes, 'meshes:')
+        prints(meshes)
     elif h3dc.CMD_SELECTED in lx.args():  # type: ignore
         selected: set[modo.Item] = set(modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True))
-        h3dd.print_items(selected, 'locators:')
+        prints(selected)
         roots: set[modo.Item] = set(filter(is_root_prefix, selected))
-        h3dd.print_items(roots, 'roots:')
+        prints(roots)
         meshes: set[modo.Item] = set(filter(is_mesh_prefix, selected))
-        h3dd.print_items(meshes, 'meshes:')
+        prints(meshes)
 
     for root in roots:
         reset_hierarchy_info(root)
@@ -78,9 +83,6 @@ def main() -> None:
     for mesh in meshes:
         reset_hierarchy_info(mesh)
 
-
-h3dd = H3dDebug(enable=False, file=replace_file_ext(modo.Scene().filename, '.log'))
-printd = h3dd.print_debug
 
 if __name__ == '__main__':
     main()

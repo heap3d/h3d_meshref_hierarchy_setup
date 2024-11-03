@@ -10,6 +10,8 @@
 # 1. remove unnecessary elements from hierarchy
 # 2. run Unparent Meshes command
 
+from typing import Iterable
+
 import modo
 import modo.constants as c
 import lx
@@ -17,12 +19,12 @@ import lx
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_utilites.scripts.h3d_utils import (
     parent_items_to,
-    replace_file_ext,
     itype_int,
     set_description_tag,
     get_description_tag,
 )
-from h3d_utilites.scripts.h3d_debug import H3dDebug
+from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reparent import get_hierarchy_root
+from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
 
 
 def normalize_hierarchy(root: modo.Item) -> modo.Item:
@@ -34,20 +36,25 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
     Returns:
         modo.Item: root of updated hierarchy
     """
-    mesh_candidates = {
-        i for i in root.children(recursive=True, itemType=c.MESH_TYPE) if i.children()
-    }
-    meshinst_candidates = {
-        i for i in root.children(recursive=True, itemType=c.MESHINST_TYPE) if i.children()
-    }
+    fn_in()
+
+    prints(root)
+    mesh_candidates = {i for i in root.children(recursive=True, itemType=c.MESH_TYPE) if i.children()}
+    prints(mesh_candidates)
+    meshinst_candidates = {i for i in root.children(recursive=True, itemType=c.MESHINST_TYPE) if i.children()}
+    prints(meshinst_candidates)
     replace_candidates = mesh_candidates.union(meshinst_candidates)
 
     root_is_mesh = itype_int(root.type) == c.MESH_TYPE or itype_int(root.type) == c.MESHINST_TYPE
+    prints(root_is_mesh)
     root_has_children = bool(root.children())
+    prints(root_has_children)
     if root_is_mesh and root_has_children:
         replace_candidates.add(root)
 
+    prints(replace_candidates)
     if not replace_candidates:
+        fn_out()
         return root
 
     for mesh in replace_candidates:
@@ -62,9 +69,12 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
         parent_items_to([mesh], locator)
 
     updated_root = root.parent
+    prints(updated_root)
     if not updated_root:
+        fn_out()
         return root
 
+    fn_out()
     return updated_root
 
 
@@ -112,7 +122,7 @@ def store_mesh_info(item: modo.Item) -> None:
         return
 
     hierarchy_id = get_description_tag(item.parent)
-    h3dd.print_debug(f'item: {item.name}')
+    prints(f'item: {item.name}')
     px = lx.eval(f'transform.channel pos.X ? item:{item.id}')
     py = lx.eval(f'transform.channel pos.Y ? item:{item.id}')
     pz = lx.eval(f'transform.channel pos.Z ? item:{item.id}')
@@ -138,13 +148,14 @@ def unparent_hierarchy(root: modo.Item) -> None:
         root (modo.Item): root of hierarchy
     """
     meshes = [
-        i for i in root.children(recursive=True)
+        i
+        for i in root.children(recursive=True)
         if (itype_int(i.type) == c.MESH_TYPE or itype_int(i.type) == c.MESHINST_TYPE)
     ]
     if not meshes:
         return
 
-    parents: set[modo.Item] = {root}
+    parents: set[modo.Item] = {root, }
     for mesh in meshes:
         if not mesh.parent:
             continue
@@ -164,13 +175,12 @@ def unparent_hierarchy(root: modo.Item) -> None:
         parent_items_to(items=meshes, parent=None, index=index)  # type: ignore
 
 
-def main() -> None:
-    items: set[modo.Item] = set(
-        modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
-    )
-    roots: set[modo.Item] = {i for i in items if not i.parents}
-    hierarchies: set[modo.Item] = {i for i in roots if i.children()}
+def get_normalized_hierarchies(roots: Iterable[modo.Item]) -> set[modo.Item]:
+    fn_in()
 
+    prints(roots)
+    hierarchies: set[modo.Item] = {i for i in roots if i.children()}
+    prints(hierarchies)
     normalized_hierarchies: set[modo.Item] = set()
     for hierarchy in hierarchies:
         if not hierarchy.name.startswith(h3dc.ROOT_PREFIX):
@@ -179,11 +189,47 @@ def main() -> None:
             normalized_hierarchy = hierarchy
         normalized_hierarchies.add(normalized_hierarchy)
 
+    fn_out()
+    return normalized_hierarchies
+
+
+def default_action():
+    items: set[modo.Item] = set(modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True))
+    roots: set[modo.Item] = {i for i in items if not i.parents}
+    normalized_hierarchies = get_normalized_hierarchies(roots)
+
     for normalized_hierarchy in normalized_hierarchies:
         unparent_hierarchy(normalized_hierarchy)
 
 
+def hierarchy_action():
+    fn_in()
+
+    items: set[modo.Item] = set(modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True))
+    prints(items)
+    roots: set[modo.Item] = {get_hierarchy_root(i) for i in items if get_hierarchy_root(i)}  # type: ignore
+    prints(roots)
+    normalized_hierarchies = get_normalized_hierarchies(roots)
+    prints(normalized_hierarchies)
+
+    for normalized_hierarchy in normalized_hierarchies:
+        unparent_hierarchy(normalized_hierarchy)
+
+    fn_out()
+
+
+def main() -> None:
+    arg = ''
+    if lx.args():
+        arg = lx.args()[0]  # type: ignore
+
+    actions = {
+        h3dc.CMD_HIERARCHY: hierarchy_action,
+    }
+
+    action = actions.get(arg, default_action)
+    action()
+
+
 if __name__ == "__main__":
-    scenename = replace_file_ext(modo.Scene().filename, ".log")
-    h3dd = H3dDebug(enable=False, file=scenename)
     main()

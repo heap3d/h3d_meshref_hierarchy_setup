@@ -7,7 +7,6 @@
 # EMAG
 # remove a 'processed' mark from items
 
-
 import lx
 import modo
 import modo.constants as c
