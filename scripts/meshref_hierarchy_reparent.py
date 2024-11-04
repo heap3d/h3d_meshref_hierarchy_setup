@@ -29,7 +29,7 @@ from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
 MSG_WAS_NOT_REPARENT = 'was not reparent: already processed'
 
 
-def get_parent_info(item: modo.Item) -> str:
+def get_parent_info_by_tag(item: modo.Item) -> str:
     """get item parent info from item's description tag
 
     Args:
@@ -42,7 +42,7 @@ def get_parent_info(item: modo.Item) -> str:
     return description
 
 
-def get_transform_values(item: modo.Item) -> tuple:
+def get_transform_values_by_tag(item: modo.Item) -> tuple:
     """get transform values from item's description tag
 
     Args:
@@ -69,7 +69,7 @@ def get_transform_values(item: modo.Item) -> tuple:
     return tuple((pos, rot, scl))
 
 
-def is_processed(item: modo.Item) -> bool:
+def is_processed_by_tag(item: modo.Item) -> bool:
     """checks if item has processed mark
 
     Args:
@@ -112,11 +112,11 @@ def reparent(mesh: modo.Item) -> None:
     Args:
         item (modo.Item): item to reparent
     """
-    root = get_mesh_root(mesh)
+    root = get_mesh_root_by_tag(mesh)
 
     mesh.setParent(root)
 
-    pos, rot, scl = get_transform_values(mesh)
+    pos, rot, scl = get_transform_values_by_tag(mesh)
 
     try:
         mesh.position.set(pos)
@@ -126,7 +126,7 @@ def reparent(mesh: modo.Item) -> None:
         print(f'reparent alignment failed for item:<{mesh.name}>')
 
 
-def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
+def get_mesh_root_by_tag(mesh: modo.Item) -> Union[modo.Item, None]:
     """get hierarchy root of the specified mesh item
 
     Args:
@@ -139,15 +139,15 @@ def get_mesh_root(mesh: modo.Item) -> Union[modo.Item, None]:
         return None
 
     roots = {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True) if is_root_prefix(i)}
-    mesh_info = get_parent_info(mesh)
+    mesh_info = get_parent_info_by_tag(mesh)
     for root in roots:
-        if get_parent_info(root) == mesh_info:
+        if get_parent_info_by_tag(root) == mesh_info:
             return root
 
     return None
 
 
-def get_hierarchy_root(item: modo.Item) -> Union[modo.Item, None]:
+def get_hierarchy_root_by_root(item: modo.Item) -> Union[modo.Item, None]:
     """gets hierarchy root of the specified item
 
     Args:
@@ -156,36 +156,39 @@ def get_hierarchy_root(item: modo.Item) -> Union[modo.Item, None]:
     Returns:
         modo.Item: hierarchy root item
     """
-    fn_in()
+    fn_in(f'<{item.name}> : <{item=}>')
 
-    prints(item)
     if is_root_prefix(item):
         parents = item.parents
+        prints(parents)
         if parents:
-            fn_out()
+            fn_out(parents[-1].name)
             return parents[-1]
         else:
-            fn_out()
+            fn_out(item.name)
             return item
     elif not is_mesh_prefix(item):
-        fn_out()
+        fn_out('not is_mesh_prefix(item) -> None')
         return None
 
-    mesh_root = get_mesh_root(item)
+    mesh_root = get_mesh_root_by_tag(item)
+    prints(mesh_root)
 
     if mesh_root:
         hierarchy_roots = mesh_root.parents
+        prints(hierarchy_roots)
     else:
         hierarchy_roots = None
+        prints(hierarchy_roots)
     if not hierarchy_roots:
-        fn_out()
+        fn_out(f'{mesh_root.name}')  # type: ignore
         return mesh_root
     else:
-        fn_out()
+        fn_out(f'{hierarchy_roots[-1].name} {hierarchy_roots[-1]=}')
         return hierarchy_roots[-1]
 
 
-def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
+def get_hierarchy_meshesby_tag(root: Union[modo.Item, None]) -> set[modo.Item]:
     """get meshes set belong to the hierarchy root
 
     Args:
@@ -200,17 +203,17 @@ def get_hierarchy_meshes(root: Union[modo.Item, None]) -> set[modo.Item]:
     if not is_root_prefix(root):
         return set()
 
-    root_info = get_parent_info(root)
+    root_info = get_parent_info_by_tag(root)
 
     return {i for i in modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
-            if get_parent_info(i) == root_info}
+            if get_parent_info_by_tag(i) == root_info}
 
 
 def get_hierarchy_members(items: Iterable[modo.Item]) -> set[modo.Item]:
     meshes = set()
     for item in items:
-        root = get_hierarchy_root(item)
-        meshes = meshes.union(get_hierarchy_meshes(root))
+        root = get_hierarchy_root_by_root(item)
+        meshes = meshes.union(get_hierarchy_meshesby_tag(root))
 
     return meshes
 
@@ -235,7 +238,7 @@ def hierarchy_action():
 
 def reparent_meshes(meshes: Iterable[modo.Item]):
     for mesh in meshes:
-        if not is_processed(mesh):
+        if not is_processed_by_tag(mesh):
             reparent(mesh=mesh)
             add_processed_mark(mesh)
         else:

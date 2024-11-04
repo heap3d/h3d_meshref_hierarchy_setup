@@ -23,8 +23,7 @@ from h3d_utilites.scripts.h3d_utils import (
     set_description_tag,
     get_description_tag,
 )
-from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reparent import get_hierarchy_root
-from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
+from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints, h3dd
 
 
 def normalize_hierarchy(root: modo.Item) -> modo.Item:
@@ -207,7 +206,14 @@ def hierarchy_action():
 
     items: set[modo.Item] = set(modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True))
     prints(items)
-    roots: set[modo.Item] = {get_hierarchy_root(i) for i in items if get_hierarchy_root(i)}  # type: ignore
+    children: set[modo.Item] = set()
+    for item in items:
+        children.update(item.children(recursive=True, itemType=c.MESH_TYPE))
+        children.update(item.children(recursive=True, itemType=c.MESHINST_TYPE))
+    prints(children)
+    items.update(children)
+    prints(items)
+    roots: set[modo.Item] = {i.parent for i in items if i.parent}  # type: ignore
     prints(roots)
     normalized_hierarchies = get_normalized_hierarchies(roots)
     prints(normalized_hierarchies)
@@ -232,4 +238,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    h3dd.enable_debug_output(False)
     main()
