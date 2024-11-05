@@ -35,25 +35,16 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
     Returns:
         modo.Item: root of updated hierarchy
     """
-    fn_in()
-
-    prints(root)
     mesh_candidates = {i for i in root.children(recursive=True, itemType=c.MESH_TYPE) if i.children()}
-    prints(mesh_candidates)
     meshinst_candidates = {i for i in root.children(recursive=True, itemType=c.MESHINST_TYPE) if i.children()}
-    prints(meshinst_candidates)
     replace_candidates = mesh_candidates.union(meshinst_candidates)
 
     root_is_mesh = itype_int(root.type) == c.MESH_TYPE or itype_int(root.type) == c.MESHINST_TYPE
-    prints(root_is_mesh)
     root_has_children = bool(root.children())
-    prints(root_has_children)
     if root_is_mesh and root_has_children:
         replace_candidates.add(root)
 
-    prints(replace_candidates)
     if not replace_candidates:
-        fn_out()
         return root
 
     for mesh in replace_candidates:
@@ -68,12 +59,9 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
         parent_items_to([mesh], locator)
 
     updated_root = root.parent
-    prints(updated_root)
     if not updated_root:
-        fn_out()
         return root
 
-    fn_out()
     return updated_root
 
 
@@ -84,8 +72,11 @@ def add_prefix_to_name(item: modo.Item, prefix: str) -> None:
         item (modo.Item): item to change the name
         prefix (str): prefix to add to the item name
     """
-    if not str(item.name).startswith(prefix):
-        item.name = prefix + item.name
+    try:
+        if not str(item.name).startswith(prefix):
+            item.name = prefix + item.name
+    except RuntimeError:
+        print(f'{item.name} : Failed to change item name.')
 
 
 def store_parent_info(item: modo.Item) -> None:
@@ -119,18 +110,16 @@ def store_mesh_info(item: modo.Item) -> None:
     """
     if not item.parent:
         return
-
     hierarchy_id = get_description_tag(item.parent)
-    prints(f'item: {item.name}')
-    px = lx.eval(f'transform.channel pos.X ? item:{item.id}')
-    py = lx.eval(f'transform.channel pos.Y ? item:{item.id}')
-    pz = lx.eval(f'transform.channel pos.Z ? item:{item.id}')
-    rx = lx.eval(f'transform.channel rot.X ? item:{item.id}')
-    ry = lx.eval(f'transform.channel rot.Y ? item:{item.id}')
-    rz = lx.eval(f'transform.channel rot.Z ? item:{item.id}')
-    sx = lx.eval(f'transform.channel scl.X ? item:{item.id}')
-    sy = lx.eval(f'transform.channel scl.Y ? item:{item.id}')
-    sz = lx.eval(f'transform.channel scl.Z ? item:{item.id}')
+    px = lx.eval(f'transform.channel pos.X ? item:{{{item.id}}}')
+    py = lx.eval(f'transform.channel pos.Y ? item:{{{item.id}}}')
+    pz = lx.eval(f'transform.channel pos.Z ? item:{{{item.id}}}')
+    rx = lx.eval(f'transform.channel rot.X ? item:{{{item.id}}}')
+    ry = lx.eval(f'transform.channel rot.Y ? item:{{{item.id}}}')
+    rz = lx.eval(f'transform.channel rot.Z ? item:{{{item.id}}}')
+    sx = lx.eval(f'transform.channel scl.X ? item:{{{item.id}}}')
+    sy = lx.eval(f'transform.channel scl.Y ? item:{{{item.id}}}')
+    sz = lx.eval(f'transform.channel scl.Z ? item:{{{item.id}}}')
     pos_values = f'{px} {py} {pz}'
     rot_values = f'{rx} {ry} {rz}'
     scl_values = f'{sx} {sy} {sz}'
@@ -175,11 +164,7 @@ def unparent_hierarchy(root: modo.Item) -> None:
 
 
 def get_normalized_hierarchies(roots: Iterable[modo.Item]) -> set[modo.Item]:
-    fn_in()
-
-    prints(roots)
     hierarchies: set[modo.Item] = {i for i in roots if i.children()}
-    prints(hierarchies)
     normalized_hierarchies: set[modo.Item] = set()
     for hierarchy in hierarchies:
         if not hierarchy.name.startswith(h3dc.ROOT_PREFIX):
@@ -188,7 +173,6 @@ def get_normalized_hierarchies(roots: Iterable[modo.Item]) -> set[modo.Item]:
             normalized_hierarchy = hierarchy
         normalized_hierarchies.add(normalized_hierarchy)
 
-    fn_out()
     return normalized_hierarchies
 
 
@@ -202,26 +186,17 @@ def default_action():
 
 
 def hierarchy_action():
-    fn_in()
-
     items: set[modo.Item] = set(modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True))
-    prints(items)
     children: set[modo.Item] = set()
     for item in items:
         children.update(item.children(recursive=True, itemType=c.MESH_TYPE))
         children.update(item.children(recursive=True, itemType=c.MESHINST_TYPE))
-    prints(children)
     items.update(children)
-    prints(items)
     roots: set[modo.Item] = {i.parent for i in items if i.parent}  # type: ignore
-    prints(roots)
     normalized_hierarchies = get_normalized_hierarchies(roots)
-    prints(normalized_hierarchies)
 
     for normalized_hierarchy in normalized_hierarchies:
         unparent_hierarchy(normalized_hierarchy)
-
-    fn_out()
 
 
 def main() -> None:
@@ -238,5 +213,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    h3dd.enable_debug_output(False)
+    h3dd.enable_debug_output(True)
     main()
