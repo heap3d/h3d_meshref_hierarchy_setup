@@ -27,15 +27,15 @@ def get_transforms(item: modo.Item) -> tuple[
     tuple[float, float, float],
     tuple[float, float, float],
 ]:
-    px = lx.eval(f'transform.channel pos.X ? item:{item.id}')
-    py = lx.eval(f'transform.channel pos.Y ? item:{item.id}')
-    pz = lx.eval(f'transform.channel pos.Z ? item:{item.id}')
-    rx = lx.eval(f'transform.channel rot.X ? item:{item.id}')
-    ry = lx.eval(f'transform.channel rot.Y ? item:{item.id}')
-    rz = lx.eval(f'transform.channel rot.Z ? item:{item.id}')
-    sx = lx.eval(f'transform.channel scl.X ? item:{item.id}')
-    sy = lx.eval(f'transform.channel scl.Y ? item:{item.id}')
-    sz = lx.eval(f'transform.channel scl.Z ? item:{item.id}')
+    px = lx.eval(f'transform.channel pos.X ? item:{{{item.id}}}')
+    py = lx.eval(f'transform.channel pos.Y ? item:{{{item.id}}}')
+    pz = lx.eval(f'transform.channel pos.Z ? item:{{{item.id}}}')
+    rx = lx.eval(f'transform.channel rot.X ? item:{{{item.id}}}')
+    ry = lx.eval(f'transform.channel rot.Y ? item:{{{item.id}}}')
+    rz = lx.eval(f'transform.channel rot.Z ? item:{{{item.id}}}')
+    sx = lx.eval(f'transform.channel scl.X ? item:{{{item.id}}}')
+    sy = lx.eval(f'transform.channel scl.Y ? item:{{{item.id}}}')
+    sz = lx.eval(f'transform.channel scl.Z ? item:{{{item.id}}}')
 
     return ((px, py, pz), (rx, ry, rz), (sx, sy, sz))  # type: ignore
 
@@ -90,17 +90,17 @@ def matched_item(item: modo.Item, items: list[modo.Item]) -> Union[modo.Item, No
 
 
 def match_item(item: modo.Item, itemto: modo.Item):
-    lx.eval(f'item.match item pos average:false item:{item.id} itemTo:{itemto.id}')
-    lx.eval(f'item.match item rot average:false item:{item.id} itemTo:{itemto.id}')
-    lx.eval(f'item.match item scl average:false item:{item.id} itemTo:{itemto.id}')
+    lx.eval(f'item.match item pos average:false item:{{{item.id}}} itemTo:{{{itemto.id}}}')
+    lx.eval(f'item.match item rot average:false item:{{{item.id}}} itemTo:{{{itemto.id}}}')
+    lx.eval(f'item.match item scl average:false item:{{{item.id}}} itemTo:{{{itemto.id}}}')
 
 
 def parent(item: modo.Item, parent: Union[modo.Item, None] = None, inplace: int = 1, position: int = 0):
     if not parent:
-        lx.eval(f'item.parent item:{item.id} parent:{{}} position:{position} inPlace:{inplace}')
+        lx.eval(f'item.parent item:{{{item.id}}} parent:{{}} position:{{{position}}} inPlace:{{{inplace}}}')
         return
 
-    lx.eval(f'item.parent item:{item.id} parent:{parent.id} position:{position} inPlace:{inplace}')
+    lx.eval(f'item.parent item:{{{item.id}}} parent:{{{parent.id}}} position:{{{position}}} inPlace:{{{inplace}}}')
 
 
 def is_hierarchy_setup_item(item: modo.Item) -> bool:
