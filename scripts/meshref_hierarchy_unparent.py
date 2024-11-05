@@ -213,5 +213,5 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    h3dd.enable_debug_output(True)
+    h3dd.enable_debug_output(False)
     main()
