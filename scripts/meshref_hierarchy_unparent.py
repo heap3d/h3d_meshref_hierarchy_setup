@@ -23,7 +23,7 @@ from h3d_utilites.scripts.h3d_utils import (
     set_description_tag,
     get_description_tag,
 )
-from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints, h3dd
+from h3d_utilites.scripts.h3d_debug import h3dd
 
 
 def normalize_hierarchy(root: modo.Item) -> modo.Item:
