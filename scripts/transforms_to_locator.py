@@ -14,12 +14,81 @@ import lx
 from typing import Union
 
 from h3d_utilites.scripts.h3d_utils import get_parent_index
+from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 
 
 LOCATOR_SUFFIX = ' loc'
 ARG_SELECTED = 'selected'
 ARG_FORCED_SELECTED = 'forced'
+ARG_EACH = 'each'
+
+
+def main():
+    actions = {
+        ARG_SELECTED: selected_action,
+        ARG_FORCED_SELECTED: forced_selected_action,
+        ARG_EACH: each_action,
+    }
+
+    args = lx.args()
+    if not args:
+        arg = ''
+    else:
+        arg = args[0]
+
+    selected = modo.Scene().selected
+    action = actions.get(arg, default_action)
+    new_locators = action()
+
+    modo.Scene().deselect()
+    if new_locators:
+        for item in new_locators:
+            item.select()
+    else:
+        for item in selected:
+            item.select()
+
+
+def default_action() -> tuple[modo.Item, ...]:
+    fn_in()
+    meshes = get_meshes()
+    locators = get_locators()
+    new_locators = convert_transforms(meshes, locators)
+
+    fn_out()
+    return tuple(new_locators)
+
+
+def selected_action() -> tuple[modo.Item, ...]:
+    fn_in()
+    meshes = get_selected_meshes_if_no_parent()
+    locators = get_locators()
+    new_locators = convert_transforms(meshes, locators)
+
+    fn_out()
+    return tuple(new_locators)
+
+
+def forced_selected_action() -> tuple[modo.Item, ...]:
+    fn_in()
+    meshes = get_forced_selected_meshes()
+    locators = get_selected_locators()
+    new_locators = convert_transforms_forced(meshes, locators)
+
+    fn_out()
+    return tuple(new_locators)
+
+
+def each_action() -> tuple[modo.Item, ...]:
+    fn_in()
+    meshes = [item for item in modo.Scene().selectedByType(itype=c.MESH_TYPE)]
+    meshes.extend([item for item in modo.Scene().selectedByType(itype=c.MESHINST_TYPE)])
+    prints(meshes)
+    new_locators = convert_transforms_each(meshes)
+
+    fn_out()
+    return tuple(new_locators)
 
 
 def get_transforms(item: modo.Item) -> tuple[
@@ -153,6 +222,21 @@ def convert_transforms_forced(meshes: list[modo.Mesh], locators: list[modo.Item]
     return working_locators[len(locators):]
 
 
+def convert_transforms_each(meshes: list[modo.Mesh]) -> list[modo.Item]:
+    working_locators = []
+    prints(meshes)
+    for mesh in meshes:
+        locator = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
+        locator.name = mesh.name + LOCATOR_SUFFIX
+        match_item(locator, mesh)
+        parent(locator, mesh.parent, position=get_parent_index(mesh))
+        working_locators.append(locator)
+
+        parent(mesh, locator)
+
+    return working_locators
+
+
 def get_meshes():
     meshes = [
         item
@@ -171,7 +255,7 @@ def get_meshes():
     return meshes
 
 
-def get_selected_meshes():
+def get_selected_meshes_if_no_parent():
     meshes = [
         item
         for item in modo.Scene().selectedByType(itype=c.MESH_TYPE)
@@ -224,52 +308,6 @@ def get_selected_locators():
     return locators
 
 
-def default_action() -> tuple[modo.Item, ...]:
-    meshes = get_meshes()
-    locators = get_locators()
-    new_locators = convert_transforms(meshes, locators)
-
-    return tuple(new_locators)
-
-
-def selected_action() -> tuple[modo.Item, ...]:
-    meshes = get_selected_meshes()
-    locators = get_locators()
-    new_locators = convert_transforms(meshes, locators)
-
-    return tuple(new_locators)
-
-
-def forced_selected_action() -> tuple[modo.Item, ...]:
-    meshes = get_forced_selected_meshes()
-    locators = get_selected_locators()
-    new_locators = convert_transforms_forced(meshes, locators)
-
-    return tuple(new_locators)
-
-
-def main():
-    arg = ''
-    if lx.args():
-        arg = lx.args()[0]  # type: ignore
-
-    actions = {
-        ARG_SELECTED: selected_action,
-        ARG_FORCED_SELECTED: forced_selected_action,
-    }
-
-    selected = modo.Scene().selected
-    action = actions.get(arg, default_action)
-    new_locators = action()
-
-    modo.Scene().deselect()
-    if new_locators:
-        for item in new_locators:
-            item.select()
-    else:
-        for item in selected:
-            item.select()
-
-
 if __name__ == '__main__':
+    h3dd.enable_debug_output(False)
     main()
