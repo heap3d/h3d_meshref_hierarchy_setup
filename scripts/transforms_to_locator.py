@@ -82,10 +82,9 @@ def forced_selected_action() -> tuple[modo.Item, ...]:
 
 def each_action() -> tuple[modo.Item, ...]:
     fn_in()
-    meshes = [item for item in modo.Scene().selectedByType(itype=c.MESH_TYPE)]
-    meshes.extend([item for item in modo.Scene().selectedByType(itype=c.MESHINST_TYPE)])
-    prints(meshes)
-    new_locators = convert_transforms_each(meshes)
+    items = [item for item in modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)]
+    prints(items)
+    new_locators = convert_transforms_each(items)
 
     fn_out()
     return tuple(new_locators)
