@@ -14,7 +14,6 @@ import lx
 from typing import Union
 
 from h3d_utilites.scripts.h3d_utils import get_parent_index
-from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 
 
@@ -51,42 +50,33 @@ def main():
 
 
 def default_action() -> tuple[modo.Item, ...]:
-    fn_in()
     meshes = get_meshes()
     locators = get_locators()
     new_locators = convert_transforms(meshes, locators)
 
-    fn_out()
     return tuple(new_locators)
 
 
 def selected_action() -> tuple[modo.Item, ...]:
-    fn_in()
     meshes = get_selected_meshes_if_no_parent()
     locators = get_locators()
     new_locators = convert_transforms(meshes, locators)
 
-    fn_out()
     return tuple(new_locators)
 
 
 def forced_selected_action() -> tuple[modo.Item, ...]:
-    fn_in()
     meshes = get_forced_selected_meshes()
     locators = get_selected_locators()
     new_locators = convert_transforms_forced(meshes, locators)
 
-    fn_out()
     return tuple(new_locators)
 
 
 def each_action() -> tuple[modo.Item, ...]:
-    fn_in()
     items = [item for item in modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)]
-    prints(items)
     new_locators = convert_transforms_each(items)
 
-    fn_out()
     return tuple(new_locators)
 
 
@@ -223,7 +213,6 @@ def convert_transforms_forced(meshes: list[modo.Mesh], locators: list[modo.Item]
 
 def convert_transforms_each(meshes: list[modo.Mesh]) -> list[modo.Item]:
     working_locators = []
-    prints(meshes)
     for mesh in meshes:
         locator = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
         locator.name = mesh.name + LOCATOR_SUFFIX
@@ -308,5 +297,4 @@ def get_selected_locators():
 
 
 if __name__ == '__main__':
-    h3dd.enable_debug_output(False)
     main()

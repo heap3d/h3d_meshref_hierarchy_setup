@@ -23,7 +23,6 @@ from typing import Union, Iterable
 from h3d_utilites.scripts.h3d_utils import get_description_tag, set_description_tag
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix, is_mesh_prefix
-from h3d_utilites.scripts.h3d_debug import fn_in, fn_out, prints
 
 
 MSG_WAS_NOT_REPARENT = 'was not reparent: already processed'
@@ -156,35 +155,24 @@ def get_hierarchy_root_by_root(item: modo.Item) -> Union[modo.Item, None]:
     Returns:
         modo.Item: hierarchy root item
     """
-    fn_in(f'<{item.name}> : <{item=}>')
-
     if is_root_prefix(item):
         parents = item.parents
-        prints(parents)
         if parents:
-            fn_out(parents[-1].name)
             return parents[-1]
         else:
-            fn_out(item.name)
             return item
     elif not is_mesh_prefix(item):
-        fn_out('not is_mesh_prefix(item) -> None')
         return None
 
     mesh_root = get_mesh_root_by_tag(item)
-    prints(mesh_root)
 
     if mesh_root:
         hierarchy_roots = mesh_root.parents
-        prints(hierarchy_roots)
     else:
         hierarchy_roots = None
-        prints(hierarchy_roots)
     if not hierarchy_roots:
-        fn_out(f'{mesh_root.name}')  # type: ignore
         return mesh_root
     else:
-        fn_out(f'{hierarchy_roots[-1].name} {hierarchy_roots[-1]=}')
         return hierarchy_roots[-1]
 
 
