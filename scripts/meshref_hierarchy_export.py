@@ -16,7 +16,6 @@ import lx
 
 from h3d_meshref_hierarchy_setup.scripts.meshref_hierarchy_reset import is_root_prefix
 
-from h3d_utilites.scripts.h3d_debug import h3dd, prints, fn_in, fn_out
 
 HIERARCHY_SUFFIX = '_Hierarchy'
 MESH_SUFFIX = '_MeshRef'
@@ -55,69 +54,44 @@ def main() -> None:
 
 
 def generate_filename_backup_hierarchy(name: str) -> list[str]:
-    fn_in(f'{name=}')
     basename, = name.split('.')[:1]
-    prints(basename)
     nosuffix = basename.removesuffix(MESH_SUFFIX)
-    prints(nosuffix)
     namesuffix = f'{nosuffix}{HIERARCHY_SUFFIX}'
-    prints(namesuffix)
     fileindex = get_fileindex(f'{namesuffix}{BACKUP_SUFFIX}_.lxo')
-    prints(fileindex)
 
     backupname = f'{namesuffix}{BACKUP_SUFFIX}{fileindex}.lxo'
-    prints(backupname)
     fullname = f'{namesuffix}.lxo'
-    prints(fullname)
-    fn_out()
 
     return [fullname, backupname]
 
 
 def generate_filename_backup_meshref(name: str) -> list[str]:
-    fn_in(f'{name=}')
     basename, = name.split('.')[:1]
-    prints(basename)
     nosuffix = basename.removesuffix(MESH_SUFFIX)
-    prints(nosuffix)
     namesuffix = f'{nosuffix}{MESH_SUFFIX}'
-    prints(namesuffix)
     fileindex = get_fileindex(f'{namesuffix}{BACKUP_SUFFIX}_.lxo')
-    prints(fileindex)
 
     backupname = f'{namesuffix}{BACKUP_SUFFIX}{fileindex}.lxo'
-    prints(backupname)
     fullname = f'{namesuffix}.lxo'
-    prints(fullname)
-    fn_out()
 
     return [fullname, backupname]
 
 
 def get_fileindex(filepath: str) -> str:
-    fn_in(f'{filepath=}')
     if not os.path.isfile(filepath):
-        fn_out('empty string')
         return ''
 
     dir, scenename = os.path.split(filepath)
-    prints(dir)
-    prints(scenename)
     files = [f for f in os.listdir(dir) if os.path.isfile(os.path.join(dir, f))]
-    prints(files)
 
     basename = os.path.splitext(scenename)[0]
-    prints(basename)
     indexedfiles = sorted([f for f in files if f.startswith(basename)])
-    prints(indexedfiles)
     pattern = r'(\d+).lxo$'
     try:
         lastindex = int(re.findall(pattern, indexedfiles[-1])[0])
-        prints(lastindex)
     except IndexError:
         lastindex = 0
-        prints('lastindex set to 0')
-    fn_out(f'_{lastindex+1:04}')
+
     return f'_{lastindex+1:04}'
 
 
@@ -140,5 +114,4 @@ def file_rename(source: str, destination: str):
 
 
 if __name__ == '__main__':
-    h3dd.enable_debug_output(False)
     main()
