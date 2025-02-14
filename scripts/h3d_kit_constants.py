@@ -14,3 +14,5 @@ CMD_SELECTED = 'selected'
 CMD_HIERARCHY = 'hierarchy'
 
 PROCESSED_MARK = 'processed'
+
+PARENT_LOC_SFX = 'loc'
