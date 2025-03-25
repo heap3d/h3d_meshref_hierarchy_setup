@@ -12,6 +12,7 @@
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_unparent.py">scripts/meshref_hierarchy_unparent.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/parent_to_new_loc.py">scripts/parent_to_new_loc.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/remove_processed_mark.py">scripts/remove_processed_mark.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/select_meshref_meshes.py">scripts/select_meshref_meshes.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/transforms_to_locator.py">scripts/transforms_to_locator.py</source>
 	</kit>
 	<message button="Help">h3d_meshref_hierarchy_setup Kit installation complete.</message>
