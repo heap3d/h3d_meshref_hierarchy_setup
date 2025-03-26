@@ -5,7 +5,7 @@
 # --------------------------------
 # EMAG
 # modo python
-# store transform info for selected items
+# save transform info for selected items to file
 
 from dataclasses import dataclass
 import os
@@ -16,6 +16,12 @@ from modo import dialogs
 
 from h3d_utilites.scripts.h3d_utils import item_get_scale, item_get_position, item_get_rotation
 from h3d_meshref_hierarchy_setup.scripts.select_meshref_meshes import is_meshref
+
+
+SCENE = 'scene'
+POS = 'pos'
+ROT = 'rot'
+SCL = 'scl'
 
 
 @dataclass
@@ -50,21 +56,23 @@ def main():
     try:
         filename = dialogs.fileSave(
             'text', 'text', fspec='format',
-            path=os.path.dirname(modo.Scene().filename)+'/items info')
+            path=f'{os.path.dirname(modo.Scene().filename)}/{get_meshref_scene_name(items[0])}')
     except TypeError:
         dialogs.alert(title='Can\'t locate the scene path.', message='Please save the scene.')
         return
 
-    if filename:
-        write_info(filename, info_lines)
+    if not filename:
+        return
+
+    write_info(filename, info_lines)
 
 
 def get_item_lines(item_info: ItemInfo) -> list[str]:
     item_lines = [
-        f'{item_info.name}::scene::{item_info.scene}\n',
-        f'{item_info.name}::mov::{" ".join([str(i) for i in item_info.pos])}\n',
-        f'{item_info.name}::rot::{" ".join([str(i) for i in item_info.rot])}\n',
-        f'{item_info.name}::scl::{" ".join([str(i) for i in item_info.scl])}\n',
+        f'{item_info.name}::{SCENE}::{item_info.scene}\n',
+        f'{item_info.name}::{POS}::{" ".join([str(i) for i in item_info.pos])}\n',
+        f'{item_info.name}::{ROT}::{" ".join([str(i) for i in item_info.rot])}\n',
+        f'{item_info.name}::{SCL}::{" ".join([str(i) for i in item_info.scl])}\n',
     ]
     return item_lines
 

@@ -5,6 +5,8 @@
 		<source target="h3d_meshref_hierarchy_setup/scripts/add_processed_mark.py">scripts/add_processed_mark.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/h3d_kit_constants.py">scripts/h3d_kit_constants.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/items_rename_regex.py">scripts/items_rename_regex.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/load_item_info_to_meshref_scene.py">scripts/load_item_info_to_meshref_scene.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/load_selected_item_info_to_meshref_scene.py">scripts/load_selected_item_info_to_meshref_scene.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_export.py">scripts/meshref_hierarchy_export.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_normalize.py">scripts/meshref_hierarchy_normalize.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_reparent.py">scripts/meshref_hierarchy_reparent.py</source>
@@ -12,7 +14,7 @@
 		<source target="h3d_meshref_hierarchy_setup/scripts/meshref_hierarchy_unparent.py">scripts/meshref_hierarchy_unparent.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/parent_to_new_loc.py">scripts/parent_to_new_loc.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/remove_processed_mark.py">scripts/remove_processed_mark.py</source>
-		<source target="h3d_meshref_hierarchy_setup/scripts/save_transform_info.py">scripts/save_transform_info.py</source>
+		<source target="h3d_meshref_hierarchy_setup/scripts/save_meshref_info_from_host.py">scripts/save_meshref_info_from_host.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/select_meshref_meshes.py">scripts/select_meshref_meshes.py</source>
 		<source target="h3d_meshref_hierarchy_setup/scripts/transforms_to_locator.py">scripts/transforms_to_locator.py</source>
 	</kit>
