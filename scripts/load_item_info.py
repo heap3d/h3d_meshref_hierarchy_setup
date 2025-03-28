@@ -8,19 +8,17 @@
 # load items info from file to meshref scene
 
 import os
+from typing import Union
 
 import modo
-import modo.constants as c
 from modo import dialogs
 
 from h3d_utilites.scripts.h3d_utils import item_set_position, item_set_rotation, item_set_scale
 
-from scripts.save_meshref_info_from_host import POS, ROT, SCL
-from scripts.load_item_info_to_meshref_scene import load_info_lines, decode_info
+from scripts.save_item_info import POS, ROT, SCL
 
 
 def main():
-    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     filename = dialogs.fileOpen('text', path=os.path.dirname(modo.Scene().filename))
     if not filename:
         return
@@ -41,9 +39,6 @@ def main():
         try:
             item = modo.Scene().item(name)
         except LookupError:
-            continue
-
-        if item not in selected:
             continue
 
         item_set_position(item, item_infos[name][POS])
