@@ -12,9 +12,11 @@
 
 from typing import Iterable
 
+import lx
 import modo
 import modo.constants as c
-import lx
+
+from h3d_utilites.scripts.h3d_utils import get_parent_index
 
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
 from h3d_utilites.scripts.h3d_utils import (
@@ -154,12 +156,11 @@ def unparent_hierarchy(root: modo.Item) -> None:
     for mesh in meshes:
         store_mesh_info(mesh)
 
-    flattened_meshes = {i for i in meshes if i.parent}
+    flattened_meshes: set[modo.Item] = {i for i in meshes if i.parent}
     if flattened_meshes:
-        index = parent.rootIndex
-        if not index:
-            index = 0
-        parent_items_to(items=meshes, parent=None, index=index)  # type: ignore
+        for flatten_mesh in flattened_meshes:
+            index = get_parent_index(flatten_mesh)
+            parent_items_to(items=flattened_meshes, parent=None, index=index)
 
 
 def get_normalized_hierarchies(roots: Iterable[modo.Item]) -> set[modo.Item]:

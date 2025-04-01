@@ -15,7 +15,9 @@ import modo
 import modo.constants as c
 from modo import dialogs
 
-from h3d_utilites.scripts.h3d_utils import item_get_scale, item_get_position, item_get_rotation
+from h3d_utilites.scripts.h3d_utils import (
+    item_get_scale, item_get_position, item_get_rotation, get_parent_index
+)
 from scripts.select_meshref_meshes import is_meshref
 
 
@@ -23,19 +25,23 @@ SCENE = 'scene'
 TYPE = 'type'
 IS_MESHREF = 'is_meshref'
 HIERARCHY = 'hierarchy'
+PARENT_INDEX = 'parent_index'
 POS = 'pos'
 ROT = 'rot'
 SCL = 'scl'
 NAME_SEPARATOR = r' \/ '
+TAG_SEPARATOR = '::'
 
 
 @dataclass
 class ItemInfo():
     name = ''
-    type = ''
+    itype = ''
     is_meshref = False
     scene = ''
     parents: list[modo.Item] = field(default_factory=lambda: [])
+    hierarchy: list[str] = field(default_factory=lambda: [])
+    parent_index = 0
     pos = modo.Vector3()
     rot = modo.Vector3()
     scl = modo.Vector3()
@@ -77,8 +83,9 @@ def main():
 def get_item_info(item: modo.Item, include_parents: bool) -> ItemInfo:
     item_info = ItemInfo()
     item_info.name = strip_meshref_name(item)
-    item_info.type = str(item.type)
+    item_info.itype = str(item.type)
     item_info.is_meshref = is_meshref(item)
+    item_info.parent_index = get_parent_index(item)
     item_info.scene = get_meshref_scene_name(item)
     item_info.pos = item_get_position(item)
     item_info.rot = item_get_rotation(item)
@@ -99,11 +106,13 @@ def get_item_parents(item: modo.Item) -> tuple[modo.Item, ...]:
 
 
 def get_item_lines(item_info: ItemInfo) -> tuple[str, ...]:
+    hierarchy = NAME_SEPARATOR.join([strip_meshref_name(parent) for parent in item_info.parents])
     item_lines = [
-        f'{item_info.name}::{SCENE}::{item_info.scene}\n',
-        f'{item_info.name}::{TYPE}::{item_info.type}\n'
+        f'{item_info.name}{TAG_SEPARATOR}{SCENE}{TAG_SEPARATOR}{item_info.scene}\n',
+        f'{item_info.name}::{TYPE}::{item_info.itype}\n'
         f'{item_info.name}::{IS_MESHREF}::{item_info.is_meshref}\n'
-        f'{item_info.name}::{HIERARCHY}::{NAME_SEPARATOR.join([parent.name for parent in item_info.parents])}\n',
+        f'{item_info.name}::{HIERARCHY}::{hierarchy}\n',
+        f'{item_info.name}::{PARENT_INDEX}::{item_info.parent_index}\n',
         f'{item_info.name}::{POS}::{" ".join([str(i) for i in item_info.pos])}\n',
         f'{item_info.name}::{ROT}::{" ".join([str(i) for i in item_info.rot])}\n',
         f'{item_info.name}::{SCL}::{" ".join([str(i) for i in item_info.scl])}\n',

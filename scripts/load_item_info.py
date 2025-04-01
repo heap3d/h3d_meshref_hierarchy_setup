@@ -5,45 +5,47 @@
 # --------------------------------
 # EMAG
 # modo python
-# load items info from file to meshref scene
+# load items info from file
 
 import os
-from typing import Union
 
 import modo
-from modo import dialogs
+import modo.constants as c
 
-from h3d_utilites.scripts.h3d_utils import item_set_position, item_set_rotation, item_set_scale
-
-from scripts.save_item_info import POS, ROT, SCL
+from scripts.load_selected_item_info import (
+    load_items_info, process_items, meshref_transform_to_locator, get_working_items,
+    TOLERANCE, FULL_HIERARCHY,
+)
 
 
 def main():
-    filename = dialogs.fileOpen('text', path=os.path.dirname(modo.Scene().filename))
+    items: list[modo.Item] = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
+    if not items:
+        return
+
+    try:
+        path = os.path.dirname(modo.Scene().filename)
+    except TypeError:
+        path = ''
+    filename = modo.dialogs.fileOpen('text', path=path)
+    if isinstance(filename, list):
+        raise ValueError('Multiple files selected. Please select one file only.')
     if not filename:
         return
 
-    info_lines = load_info_lines(filename)
+    items_info = load_items_info(filename)
+    working_items = get_working_items(items, items_info)
+    if not working_items:
+        modo.dialogs.alert('Aborted', 'No info for items in the scene found.')
+        return
 
-    item_infos = dict()
-    for info_line in info_lines:
-        if not info_line:
-            continue
-        info_items = info_line.strip().split('::')
-        key, value = list(decode_info(info_items).items())[0]
-        if info_items[0] not in item_infos:
-            item_infos[info_items[0]] = dict()
-        item_infos[info_items[0]][key] = value
+    process_items(working_items, items_info, FULL_HIERARCHY)
 
-    for name in item_infos:
-        try:
-            item = modo.Scene().item(name)
-        except LookupError:
-            continue
-
-        item_set_position(item, item_infos[name][POS])
-        item_set_rotation(item, item_infos[name][ROT])
-        item_set_scale(item, item_infos[name][SCL])
+    hierarchy_items: list[modo.Item] = items[:]
+    for selected_item in items:
+        if selected_item.parents:
+            hierarchy_items.extend(selected_item.parents)
+    meshref_transform_to_locator(hierarchy_items, TOLERANCE)
 
 
 if __name__ == '__main__':
