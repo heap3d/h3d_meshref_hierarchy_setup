@@ -121,9 +121,9 @@ def get_item_lines(item_info: ItemInfo) -> tuple[str, ...]:
 
 
 def write_info(filename: str, info_lines: Iterable[str]):
-
     with open(filename, 'w') as file:
-        file.writelines(info_lines)
+        for line in info_lines:
+            file.write(line)
 
 
 def strip_meshref_name(item: modo.Item) -> str:
