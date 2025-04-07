@@ -11,7 +11,7 @@ import modo
 import modo.constants as c
 import lx
 
-from typing import Union
+from typing import Optional
 
 from h3d_utilites.scripts.h3d_utils import get_parent_index
 import h3d_meshref_hierarchy_setup.scripts.h3d_kit_constants as h3dc
@@ -136,7 +136,7 @@ def is_transforms_matched(
     return True
 
 
-def matched_item(item: modo.Item, items: list[modo.Item]) -> Union[modo.Item, None]:
+def matched_item(item: modo.Item, items: list[modo.Item]) -> Optional[modo.Item]:
     item_transforms = get_transforms(item)
     for itemto in items:
         itemto_transforms = get_transforms(itemto)
@@ -153,7 +153,7 @@ def match_item(item: modo.Item, itemto: modo.Item):
     lx.eval(f'item.match item scl average:false item:{{{item.id}}} itemTo:{{{itemto.id}}}')
 
 
-def parent(item: modo.Item, parent: Union[modo.Item, None] = None, inplace: int = 1, position: int = 0):
+def parent(item: modo.Item, parent: Optional[modo.Item] = None, inplace: int = 1, position: int = 0):
     if not parent:
         lx.eval(f'item.parent item:{{{item.id}}} parent:{{}} position:{{{position}}} inPlace:{{{inplace}}}')
         return
@@ -218,6 +218,9 @@ def convert_transforms_each(meshes: list[modo.Mesh]) -> list[modo.Item]:
         locator.name = mesh.name + LOCATOR_SUFFIX
         match_item(locator, mesh)
         parent(locator, mesh.parent, position=get_parent_index(mesh))
+        children = mesh.children()
+        for child in children:
+            parent(child, locator, position=get_parent_index(child))
         working_locators.append(locator)
 
         parent(mesh, locator)
