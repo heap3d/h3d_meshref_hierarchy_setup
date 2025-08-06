@@ -26,6 +26,11 @@ from h3d_utilites.scripts.h3d_utils import (
     get_description_tag,
 )
 
+MESH_TYPES_INT = (
+    c.MESH_TYPE,
+    c.MESHINST_TYPE,
+)
+
 
 def normalize_hierarchy(root: modo.Item) -> modo.Item:
     """Replace mesh items with children by locators, parent original meshes to locators
@@ -36,11 +41,13 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
     Returns:
         modo.Item: root of updated hierarchy
     """
+    # original_root_parent_index = get_parent_index(root)
+    # original_root_parent = root.parent
     mesh_candidates = {i for i in root.children(recursive=True, itemType=c.MESH_TYPE) if i.children()}
     meshinst_candidates = {i for i in root.children(recursive=True, itemType=c.MESHINST_TYPE) if i.children()}
     replace_candidates = mesh_candidates.union(meshinst_candidates)
 
-    root_is_mesh = itype_int(root.type) == c.MESH_TYPE or itype_int(root.type) == c.MESHINST_TYPE
+    root_is_mesh = itype_int(root.type) in MESH_TYPES_INT
     root_has_children = bool(root.children())
     if root_is_mesh and root_has_children:
         replace_candidates.add(root)
@@ -49,6 +56,7 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
         return root
 
     for mesh in replace_candidates:
+        mesh_parent_index = get_parent_index(mesh)
         locator = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
         locator.name = mesh.name + " loc"
 
@@ -56,12 +64,15 @@ def normalize_hierarchy(root: modo.Item) -> modo.Item:
             item.setParent(locator)
 
         locator.setParent(mesh)
-        parent_items_to([locator], mesh.parent)  # type: ignore
-        parent_items_to([mesh], locator)
+        parent_items_to((locator,), mesh.parent, mesh_parent_index)
+        parent_items_to((mesh,), locator, mesh_parent_index)
 
     updated_root = root.parent
     if not updated_root:
         return root
+
+    # if not updated_root == original_root_parent:
+    #     parent_items_to((updated_root,), original_root_parent, original_root_parent_index)
 
     return updated_root
 

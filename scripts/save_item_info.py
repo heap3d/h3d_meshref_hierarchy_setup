@@ -49,6 +49,11 @@ class ItemInfo():
 
 def main():
     items: list[modo.Item] = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+
+    save_items_info(items)
+
+
+def save_items_info(items: list[modo.Item]):
     info_lines: list[str] = list()
 
     parents = set()
