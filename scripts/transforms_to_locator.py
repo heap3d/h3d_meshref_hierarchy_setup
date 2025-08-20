@@ -218,9 +218,9 @@ def convert_transforms_each(meshes: list[modo.Mesh]) -> list[modo.Item]:
         locator.name = mesh.name + LOCATOR_SUFFIX
         match_item(locator, mesh)
         parent(locator, mesh.parent, position=get_parent_index(mesh))
-        children = mesh.children()
-        for child in children:
-            parent(child, locator, position=get_parent_index(child))
+        # children = mesh.children()
+        # for child in children:
+        #     parent(child, locator, position=get_parent_index(child))
         working_locators.append(locator)
 
         parent(mesh, locator)
