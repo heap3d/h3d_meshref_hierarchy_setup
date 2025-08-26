@@ -32,10 +32,10 @@ def create_parent(items: Iterable[modo.Item], head_item: modo.Item) -> modo.Item
     parent_loc_name = f'{head_item.name} {PARENT_LOC_SFX}'
     parent_loc = modo.Scene().addItem(itype=c.LOCATOR_TYPE, name=parent_loc_name)
     match_pos_rot(parent_loc, head_item)
-    parent_items_to([parent_loc,], head_item.parent, get_parent_index(head_item))
+    parent_items_to((parent_loc,), head_item.parent, get_parent_index(head_item))
 
     for item in items:
-        parent_items_to([item,], parent_loc, get_parent_index(item))
+        parent_items_to((item,), parent_loc, get_parent_index(item))
 
     return parent_loc
 
