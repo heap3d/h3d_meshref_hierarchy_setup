@@ -47,9 +47,11 @@ def main():
         path = os.path.dirname(modo.Scene().filename)
     except TypeError:
         path = ''
+
     filename = modo.dialogs.fileOpen('text', path=path)
     if isinstance(filename, list):
         raise ValueError('Multiple files selected. Please select one file only.')
+
     if not filename:
         return
 
@@ -65,6 +67,7 @@ def main():
     for selected_item in selected:
         if selected_item.parents:
             hierarchy_items.extend(selected_item.parents)
+
     meshref_transform_to_locator(hierarchy_items, TOLERANCE)
 
 
@@ -114,9 +117,11 @@ def process_items(items: Iterable[modo.Item], items_info: ItemsInfo, full_hierar
                 items_info[strip_meshref_name(child)].parent_index,
                 inplace=False
             )
+
             item_set_position(parent, items_info[strip_meshref_name(parent)].pos)
             item_set_rotation(parent, items_info[strip_meshref_name(parent)].rot)
             item_set_scale(parent, items_info[strip_meshref_name(parent)].scl)
+
             child = parent
 
 
@@ -171,7 +176,9 @@ def get_item(name: str, meshref_scene: str, itype: str) -> modo.Item:
 
     try:
         return get_item_by_meshref_name(name, meshref_scene)
+
     except LookupError:
+        print(f'Warning: Item <{name}> not found. Creating new one.')
         return modo.Scene().addItem(itype, name)
 
 
