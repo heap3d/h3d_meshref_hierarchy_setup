@@ -5,30 +5,34 @@
 # --------------------------------
 # modo python
 # EMAG
-# renames selected items using regex pattern
+# select items using regex pattern
 
 import modo
+import modo.constants as c
 import re
 
 from h3d_utilites.scripts.h3d_utils import get_user_value
 
 
 USERVAL_PATTERN = 'h3d_irr_pattern'
-USERVAL_REPLACEMENT = 'h3d_irr_replacement'
 
 
 def main():
     pattern = get_user_value(USERVAL_PATTERN)
     if not pattern:
         return
-    replace_str = get_user_value(USERVAL_REPLACEMENT)
-    items = modo.Scene().selected
+    items = modo.Scene().items(itype=c.LOCATOR_TYPE, superType=True)
+    matched_items = []
     for item in items:
         name = item.name
         if not name:
             continue
-        new_name = re.sub(pattern, replace_str, name)
-        item.name = new_name
+        if re.search(pattern, name):
+            matched_items.append(item)
+
+    modo.Scene().deselect()
+    for item in matched_items:
+        item.select()
 
 
 if __name__ == '__main__':
