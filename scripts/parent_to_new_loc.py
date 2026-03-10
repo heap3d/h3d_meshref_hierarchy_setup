@@ -5,7 +5,7 @@
 # --------------------------------
 # modo python
 # EMAG
-# parent selected items to a new locator
+# Parent selected items to a new locator. The new locator will be named and aligned to the last selected item.
 
 from typing import Iterable
 
@@ -22,7 +22,7 @@ def main():
     if not selected:
         return
 
-    parent_align_item = selected[0]
+    parent_align_item = selected[-1]
 
     parent_loc = create_parent(selected, parent_align_item)
     parent_loc.select(replace=True)
